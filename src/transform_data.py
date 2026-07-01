@@ -16,13 +16,12 @@ RENAME_COLUMNS_DICT = {
 }
 
 def create_dataframe(path_name:str) -> pd.DataFrame:
-    path = Path(path_name)
-    
-    if not path.exists():
+
+    if not path_name:
         logging.error(f"Erro: O arquivo {path_name} não existe.")
         return None
     
-    with open(path, 'r') as f:
+    with open(path_name, 'r') as f:
         data = json.load(f)
 
     df = pd.json_normalize(data)
@@ -49,7 +48,7 @@ def rename_columns(df: pd.DataFrame, rename_dict: dict) -> pd.DataFrame:
     logging.info("Colunas renomeadas com sucesso.")
     return df_renamed
 
-def transform_data(path_name: str) -> pd.DataFrame:
+def transform_data(path_name: str,) -> pd.DataFrame:
     logging.info(f"Iniciando a transformação de dados do arquivo: {path_name}")
 
     df = create_dataframe(path_name)
