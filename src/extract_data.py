@@ -5,7 +5,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def extract_data(url: str, output_file: str):
+def extract_data(output_path: str, url: str):
     response = requests.get(url)
 
     data = response.json()
@@ -18,13 +18,9 @@ def extract_data(url: str, output_file: str):
         logging.warning(f"Erro: Nenhum dado retornado da URL: {url}")
         return None
 
-    output_path = Path(output_file)
-    output_dir = output_path.parent
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     with open(output_path, 'w') as f:
         json.dump(data, f, indent=4)
 
-    logging.info(f"Dados extraídos e salvos em: {output_file}")
+    logging.info(f"Dados extraídos e salvos em: {output_path}")
 
     return data

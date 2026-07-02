@@ -15,6 +15,8 @@ RENAME_COLUMNS_DICT = {
     "parks.visitors": "park_visitors"
 }
 
+path = Path.Path(__file__).parent / "data" / "parks.json"
+
 def create_dataframe(path_name:str) -> pd.DataFrame:
 
     if not path_name:
@@ -48,7 +50,8 @@ def rename_columns(df: pd.DataFrame, rename_dict: dict) -> pd.DataFrame:
     logging.info("Colunas renomeadas com sucesso.")
     return df_renamed
 
-def transform_data(path_name: str,) -> pd.DataFrame:
+def transform_data(path_name: str) -> pd.DataFrame:
+
     logging.info(f"Iniciando a transformação de dados do arquivo: {path_name}")
 
     df = create_dataframe(path_name)

@@ -3,6 +3,13 @@ from airflow.decorators import dag, task
 from pathlib import Path
 import sys, os
 
+sys.path.insert(0, '/opt/airflow/src')
+
+from extract_data import extract_data
+from transform_data import transform_data
+
+BRONZE_FILE_PATH = Path("/opt/airflow/data") / "parks.json"
+
 @dag(
     dag_id="park_dag",
     description="DAG para extrair, transformar e carregar dados de parques",
@@ -21,18 +28,19 @@ def park_dag():
 
     @task()
     def extract_task():
-        print("Hello from extract_task!")
+        url = "https://queue-times.com/parks.json"
+        output_path = BRONZE_FILE_PATH
+        
+        extract_data(output_path, url)
 
+    @task()
+    def transform_data_task():
+        input_file = BRONZE_FILE_PATH
+        parquet_path = Path("/opt/airflow/data") / "parks.parquet"
 
-        # url = "https://queue-times.com/parks.json"
-        # output_file = "../../data/parks.json"
+        df = transform_data(input_file)
+        df.to_parquet(parquet_path, index=False)
 
-        # extract_data(url, output_file)
-
-    # @task()
-    # def transform_task():
-    #     df = transform_data(output_file)
-    #     df.to_parquet(Path(__file__).parent / "data" / "parks.parquet", index=False)
 
     # @task()
     # def load_task():
@@ -42,6 +50,6 @@ def park_dag():
 
     # extract_task() >> transform_task() >> load_task()
     
-    extract_task()
+    extract_task() >> transform_data_task()
 
 park_dag()
