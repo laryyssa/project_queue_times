@@ -7,6 +7,7 @@ sys.path.insert(0, '/opt/airflow/src')
 
 from extract_data import extract_data
 from transform_data import transform_data
+from load_data import load_data
 
 BRONZE_FILE_PATH = Path("/opt/airflow/data") / "parks.json"
 
@@ -41,15 +42,16 @@ def park_dag():
         df = transform_data(input_file)
         df.to_parquet(parquet_path, index=False)
 
+    @task()
+    def load_task():
+        import pandas as pd
+        parquet_path = Path("/opt/airflow/data") / "parks.parquet"
+        
+        df = pd.read_parquet(parquet_path)
+        load_data("parks", df)
 
-    # @task()
-    # def load_task():
-    #     import pandas as pd
-    #     df = pd.read_parquet(Path(__file__).parent / "data" / "parks.parquet", index=False)
-    #     load_data(table_name, df)
-
-    # extract_task() >> transform_task() >> load_task()
     
-    extract_task() >> transform_data_task()
+    # extract_task() >> transform_data_task() >> load_task()
+    load_task()
 
 park_dag()

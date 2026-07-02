@@ -8,8 +8,7 @@ import pandas as pd
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-env_path = Path(__file__).parent.parent / "config" / ".env"
-load_dotenv(dotenv_path=env_path)
+load_dotenv(dotenv_path="/opt/airflow/.env")
 
 user = os.getenv("DB_USER")
 password = os.getenv("DB_PASSWORD")
@@ -18,17 +17,17 @@ host = os.getenv("DB_HOST")
 port = os.getenv("DB_PORT")
 
 def get_engine():
-    return create_engine(f"postgresql+psycopg2://{user}:{quote_plus(password)}@{host}:{port}/{database}")
+    return create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}")
 
-
-engine = get_engine()
 
 def load_data(table_name: str, df):
+    engine = get_engine()
+
     try:
         df.to_sql(
             table_name, 
             engine, 
-            if_exists='replace', 
+            if_exists='append', 
             index=False
         )
         logging.info(f"Dados carregados com sucesso na tabela: {table_name}")
