@@ -76,7 +76,7 @@ x-airflow-common:
     - ./airflow/plugins:/opt/airflow/plugins
     - ./src:/opt/airflow/src
     - ./data:/opt/airflow/data
-    - ./config/.env:/opt/airflow/.env
+    - ./airflow/src/config/.env:/opt/airflow/.env
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -147,6 +147,8 @@ services:
 
   airflow-scheduler:
     <<: *airflow-common
+    env_file:
+      - ./config/.env
     command: scheduler
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]

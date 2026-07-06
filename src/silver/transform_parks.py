@@ -1,6 +1,6 @@
 import pandas as pd
-import pathlib as Path
 import json
+# from typing import Tuple
 
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -8,14 +8,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 RENAME_COLUMNS_DICT = {
     "id": "group_id",
     "name": "group_name",
+    "parks.id": "park_id", 
     "parks.name": "park_name",
-    "parks.location": "park_location",
-    "parks.type": "park_type",
-    "parks.area": "park_area",
-    "parks.visitors": "park_visitors"
+    "parks.country": "park_country",
+    "parks.continent": "park_continent",
+    "parks.latitude": "park_latitude",
+    "parks.longitude": "park_longitude",
+    "parks.timezone": "park_timezone"
 }
 
-path = Path.Path(__file__).parent / "data" / "parks.json"
 
 def create_dataframe(path_name:str) -> pd.DataFrame:
 
@@ -50,17 +51,35 @@ def rename_columns(df: pd.DataFrame, rename_dict: dict) -> pd.DataFrame:
     logging.info("Colunas renomeadas com sucesso.")
     return df_renamed
 
-def transform_data(path_name: str) -> pd.DataFrame:
+def get_groups_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df_groups = df[["group_id", "group_name"]].drop_duplicates().reset_index(drop=True)
+    
+    logging.info("DataFrame de grupos criado com sucesso.")
+    return df_groups
 
-    logging.info(f"Iniciando a transformação de dados do arquivo: {path_name}")
+def get_parks_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df_parks = df[["park_id", "park_name", "park_country", "park_continent", "park_latitude", "park_longitude", "park_timezone"]].drop_duplicates().reset_index(drop=True)
+    
+    logging.info("DataFrame de parques criado com sucesso.")
+    return df_parks
 
-    df = create_dataframe(path_name)
+def transform_groups_and_parks(input_path: str): 
+
+    logging.info(f"Iniciando a transformação de dados do arquivo: {input_path}")
+
+    df = create_dataframe(input_path)
+    
     if df is None:
-        logging.warning(f"Erro: Não foi possível criar o DataFrame a partir do arquivo: {path_name}")
+        logging.warning(f"Erro: Não foi possível criar o DataFrame a partir do arquivo: {input_path}")
         return None
     
     df = normalize_dataframe(df)
     df = rename_columns(df, rename_dict=RENAME_COLUMNS_DICT)
 
     logging.info("Transformação de dados concluída com sucesso.")
-    return df
+    
+    df_groups = get_groups_dataframe(df)
+    df_parks = get_parks_dataframe(df)
+
+    return df_groups, df_parks
+

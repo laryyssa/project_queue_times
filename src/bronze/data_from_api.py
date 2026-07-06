@@ -5,7 +5,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def extract_data(output_path: str, url: str):
+def extract_and_load_data(output_path: str, url: str):
     response = requests.get(url)
 
     data = response.json()
@@ -22,5 +22,3 @@ def extract_data(output_path: str, url: str):
         json.dump(data, f, indent=4)
 
     logging.info(f"Dados extraídos e salvos em: {output_path}")
-
-    return data
