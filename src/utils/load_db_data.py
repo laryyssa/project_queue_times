@@ -32,16 +32,18 @@ def check_table_exists(engine:str, table_name: str, schema: str) -> bool:
     result = engine.execute(query, {"schema": schema, "table_name": table_name}).scalar()
     return result
 
-def load_db_data(df, model):
+def load_db_data(parquet_path, model):
     engine = get_engine()
     table_name = model.__tablename__
     schema = model.__table__.schema
 
+    df = pd.read_parquet(parquet_path)
+
     try:
         df.to_sql(
             table_name, 
-            schema,
-            engine, 
+            engine,
+            schema, 
             if_exists='append', 
             index=False
         )
@@ -53,3 +55,4 @@ def load_db_data(df, model):
 
     except Exception as e:
         logging.error(f"Erro ao carregar dados na tabela: {table_name}. Detalhes do erro: {e}")
+        raise

@@ -53,21 +53,18 @@ def api_parks_dag():
         load_parquet_data(df_parks, SILVER_PARKS_FILE_PATH)
         
     @task
-    def load_groups(df_groups) -> None:
-        load_db_data(df_groups, Group)
+    def load_groups_table():
+        load_db_data(SILVER_GROUPS_FILE_PATH, Group)
 
     @task
-    def load_parks(df_parks) -> None:
-        load_db_data(df_parks, Park)
+    def load_parks_table():
+        load_db_data(SILVER_PARKS_FILE_PATH, Park)
 
-    
-    # transform_result = transform_data()
 
-    # extract_data() >> transform_data()
-    # load_groups(transform_result["df_groups"])
-    # load_parks(transform_result["df_parks"])
-
-    extract_data() >> transform_data()
+    extract_data() >> transform_data() >> [
+        load_groups_table(), 
+        load_parks_table()
+    ]
 
 dag_object = api_parks_dag()
 

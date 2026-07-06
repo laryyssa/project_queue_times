@@ -53,12 +53,28 @@ def rename_columns(df: pd.DataFrame, rename_dict: dict) -> pd.DataFrame:
 
 def get_groups_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df_groups = df[["group_id", "group_name"]].drop_duplicates().reset_index(drop=True)
+
+    df_groups = df_groups.rename(columns={
+        "group_id": "id",
+        "group_name": "name"
+    })
     
     logging.info("DataFrame de grupos criado com sucesso.")
     return df_groups
 
 def get_parks_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df_parks = df[["park_id", "park_name", "park_country", "park_continent", "park_latitude", "park_longitude", "park_timezone"]].drop_duplicates().reset_index(drop=True)
+
+    df_parks = df_parks.rename(columns={
+        "park_id": "id",
+        "park_name": "name",
+        "park_country": "country",
+        "park_continent": "continent",
+        "park_latitude": "latitude",
+        "park_longitude": "longitude",
+        "park_timezone": "timezone",
+        "group_id": "group_id"
+    })
     
     logging.info("DataFrame de parques criado com sucesso.")
     return df_parks
