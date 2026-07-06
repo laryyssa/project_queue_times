@@ -5,6 +5,7 @@ Base = declarative_base()
 
 class Park(Base):
     __tablename__ = 'parks'
+    db_name = "silver"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True)

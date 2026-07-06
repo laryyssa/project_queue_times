@@ -76,7 +76,7 @@ x-airflow-common:
     - ./airflow/plugins:/opt/airflow/plugins
     - ./src:/opt/airflow/src
     - ./data:/opt/airflow/data
-    - ./airflow/src/config/.env:/opt/airflow/.env
+    - ./config/.env:/opt/airflow/.env
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -94,10 +94,10 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: mydb
     ports:
       - "5433:5432"
     volumes:
+      - ./config/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
       - pgdata:/var/lib/postgresql/data
 
 

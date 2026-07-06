@@ -11,9 +11,9 @@ from utils.load_db_data import load_db_data
 from utils.load_parquet_data import load_parquet_data
 from models import Group, Park
 
-BRONZE_PARKS_FILE_PATH = Path("/opt/airflow/data") / "parks.json"
-SILVER_PARKS_FILE_PATH = Path("/opt/airflow/data") / "parks.parquet"
-SILVER_GROUPS_FILE_PATH = Path("/opt/airflow/data") / "groups.parquet"
+BRONZE_PARKS_FILE_PATH = Path("/opt/airflow/data/bronze") / "parks.json"
+SILVER_PARKS_FILE_PATH = Path("/opt/airflow/data/silver") / "parks.parquet"
+SILVER_GROUPS_FILE_PATH = Path("/opt/airflow/data/silver") / "groups.parquet"
 
 @dag(
     dag_id="api_parks_dag",

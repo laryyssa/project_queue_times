@@ -12,12 +12,23 @@ load_dotenv(dotenv_path="/opt/airflow/.env")
 
 user = os.getenv("DB_USER")
 password = os.getenv("DB_PASSWORD")
-database = os.getenv("DB_NAME")
+db_silver = os.getenv("DB_NAME_SILVER")
+db_gold = os.getenv("DB_NAME_GOLD")
 host = os.getenv("DB_HOST")
 port = os.getenv("DB_PORT")
 
-def get_engine():
-    return create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}")
+def get_db_name(db_name_str):
+    db_map = {
+        "silver": db_silver, 
+        "gold": db_gold
+    }
+    return db_map.get(db_name_str)
+
+
+def get_engine(db_name):
+    db_name = get_db_name(db_name)
+
+    return create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}")
 
 
 def check_table_exists(engine:str, table_name: str, schema: str) -> bool:
@@ -32,8 +43,11 @@ def check_table_exists(engine:str, table_name: str, schema: str) -> bool:
     result = engine.execute(query, {"schema": schema, "table_name": table_name}).scalar()
     return result
 
+
 def load_db_data(parquet_path, model):
-    engine = get_engine()
+    model_db = model.db_name
+
+    engine = get_engine(model_db)
     table_name = model.__tablename__
     schema = model.__table__.schema
 

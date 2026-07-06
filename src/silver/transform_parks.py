@@ -63,7 +63,7 @@ def get_groups_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return df_groups
 
 def get_parks_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    df_parks = df[["park_id", "park_name", "park_country", "park_continent", "park_latitude", "park_longitude", "park_timezone"]].drop_duplicates().reset_index(drop=True)
+    df_parks = df[["park_id", "park_name", "park_country", "park_continent", "park_latitude", "park_longitude", "park_timezone", "group_id"]].drop_duplicates().reset_index(drop=True)
 
     df_parks = df_parks.rename(columns={
         "park_id": "id",
