@@ -7,7 +7,7 @@ sys.path.insert(0, '/opt/airflow/src')
 
 from bronze.data_from_api import extract_and_load_data
 from utils.create_bronze_file_path import create_bronze_file_path
-from silver.transform_parks import transform_groups_and_parks
+from silver.transform_parks_queue_time import transform_parks_queue_time
 from utils.load_db_data import load_db_data
 from utils.load_parquet_data import load_parquet_data
 from models import Group, Park
