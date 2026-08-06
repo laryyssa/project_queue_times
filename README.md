@@ -82,3 +82,9 @@ pip install -r requirements.txt
 
 
 ### 6. Acessar Airflow
+
+### Executando testes
+
+```bash
+sudo docker exec -it project_queue_times-airflow-scheduler-1  airflow tasks test api_queue_times_dag extract_data 2026-08-06
+```
