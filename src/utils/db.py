@@ -70,3 +70,7 @@ def load_db_data(parquet_path, model):
     except Exception as e:
         logging.error(f"Erro ao carregar dados na tabela: {table_name}. Detalhes do erro: {e}")
         raise
+
+def get_db_data(query: str, engine) -> pd.DataFrame:
+    df = pd.read_sql_query(text(query), engine)
+    return df
