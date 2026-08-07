@@ -69,8 +69,8 @@ def run_bronze_extraction(engine, output_base_dir: str = "/opt/airflow/data/bron
     urls = build_urls_for_park_ids(park_ids, base_url)
 
     now = datetime.now()
-    date_path = now.strftime("%Y/%m/%d")
-    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+    date_path = now.strftime("%Y/%m/%d/%H/%M")
+    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S-%SZ")
 
     saved_count = 0
     for park_id, url in zip(park_ids, urls):
