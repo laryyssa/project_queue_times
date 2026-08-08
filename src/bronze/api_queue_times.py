@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT = 15  # segundos
 
-
 def get_park_ids(engine) -> list:
     query = "SELECT DISTINCT id FROM parks"
     list_park_ids = get_db_data(query, engine)
@@ -60,21 +59,17 @@ def extract_and_load_queue_times_data(output_path: str, url: str):
     return output_path
 
 
-def run_bronze_extraction(engine, output_base_dir: str = "/opt/airflow/data/bronze/parks_queue_times") -> None:
+def run_bronze_extraction(engine, output_base_dir: str, timestamp: str) -> None:   
+    breakpoint()
 
-    print("engine", engine)
-    
+
     base_url = get_queue_times_api_base_url()
     park_ids = get_park_ids(engine)
     urls = build_urls_for_park_ids(park_ids, base_url)
 
-    now = datetime.now()
-    date_path = now.strftime("%Y/%m/%d/%H/%M")
-    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S-%SZ")
-
     saved_count = 0
     for park_id, url in zip(park_ids, urls):
-        output_path = f"{output_base_dir}/{date_path}/bronze_{park_id}_{timestamp}.json"
+        output_path = f"{output_base_dir}/bronze_{park_id}_{timestamp}.json"
         result = extract_and_load_queue_times_data(output_path, url)
         if result:
             saved_count += 1
@@ -83,10 +78,3 @@ def run_bronze_extraction(engine, output_base_dir: str = "/opt/airflow/data/bron
         logger.warning("Nenhum arquivo bronze foi gerado nesta execução.")
     else:
         logger.info(f"{saved_count}/{len(park_ids)} arquivos bronze salvos com sucesso.")
-
-
-if __name__ == "__main__":
-    from utils.db import get_engine
-
-    engine = get_engine()
-    run_bronze_extraction(engine)

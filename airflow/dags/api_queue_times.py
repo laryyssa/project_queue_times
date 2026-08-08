@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, '/opt/airflow/src')
 
 from bronze.api_queue_times import run_bronze_extraction
-from silver.transform_parks_queue_time import transform_parks_queue_time
+# from silver.transform_parks_queue_time import transform_parks_queue_time
 from utils.db import load_db_data, get_engine
 from utils.load_parquet_data import load_parquet_data
 from models import Group, Park
@@ -14,6 +14,19 @@ from models import Group, Park
 SILVER_PARKS_FILE_PATH = Path("/opt/airflow/data/silver") / "parks.parquet"
 SILVER_GROUPS_FILE_PATH = Path("/opt/airflow/data/silver") / "groups.parquet"
 BRONZE_BASE_DIR = "/opt/airflow/data/bronze/parks_queue_times"
+
+
+def create_bronze_folder_path(now: datetime, base_dir: str) -> Path:
+    date_path = now.strftime("%Y/%m/%d/%H/%M")
+
+    bronze_folder_path = Path(base_dir) / date_path
+    bronze_folder_path.mkdir(parents=True, exist_ok=True)
+
+    return Path(bronze_folder_path)
+
+def get_timestamp(now: datetime) -> str:
+    timestamp = now.strftime("%Y%m%d%H%M%S")
+    return timestamp
 
 
 @dag(
@@ -32,13 +45,28 @@ BRONZE_BASE_DIR = "/opt/airflow/data/bronze/parks_queue_times"
 )
 def api_queue_times_dag():
 
+    now = datetime.now()
+    bronze_folder_path = create_bronze_folder_path(now, BRONZE_BASE_DIR)
+    timestamp = get_timestamp(now)
 
     @task()
     def extract_data():   
         engine = get_engine("silver")
-        bronze_files = run_bronze_extraction(engine, output_base_dir=BRONZE_BASE_DIR)
-        return bronze_files
 
+        run_bronze_extraction(
+            engine, 
+            output_base_dir=bronze_folder_path, 
+            timestamp=timestamp
+        )
+
+    # @task()
+    # def transform_data():
+    #     engine = get_engine("silver")
+
+    #     transform_parks_queue_time(
+    #         engine, 
+    #         bronze_dir=bronze_folder_path
+    #     )
 
 
     extract_data()
