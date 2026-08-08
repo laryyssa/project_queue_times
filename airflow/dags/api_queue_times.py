@@ -17,7 +17,7 @@ BRONZE_BASE_DIR = "/opt/airflow/data/bronze/parks_queue_times"
 
 
 def create_bronze_folder_path(now: datetime, base_dir: str) -> Path:
-    date_path = now.strftime("%Y/%m/%d/%H/%M")
+    date_path = now.strftime("%Y/%m/%d/%H-%M")
 
     bronze_folder_path = Path(base_dir) / date_path
     bronze_folder_path.mkdir(parents=True, exist_ok=True)
@@ -59,14 +59,14 @@ def api_queue_times_dag():
             timestamp=timestamp
         )
 
-    # @task()
-    # def transform_data():
-    #     engine = get_engine("silver")
+    @task()
+    def transform_data():
+        engine = get_engine("silver")
 
-    #     transform_parks_queue_time(
-    #         engine, 
-    #         bronze_dir=bronze_folder_path
-    #     )
+        transform_parks_queue_time(
+            engine, 
+            bronze_dir=bronze_folder_path
+        )
 
 
     extract_data()

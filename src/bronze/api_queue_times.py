@@ -60,9 +60,6 @@ def extract_and_load_queue_times_data(output_path: str, url: str):
 
 
 def run_bronze_extraction(engine, output_base_dir: str, timestamp: str) -> None:   
-    breakpoint()
-
-
     base_url = get_queue_times_api_base_url()
     park_ids = get_park_ids(engine)
     urls = build_urls_for_park_ids(park_ids, base_url)
