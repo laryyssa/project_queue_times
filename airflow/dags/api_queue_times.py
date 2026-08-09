@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, '/opt/airflow/src')
 
 from bronze.api_queue_times import run_bronze_extraction
-# from silver.transform_parks_queue_time import transform_parks_queue_time
+from silver.transform_parks_queue_time import transform_parks_queue_times
 from utils.db import load_db_data, get_engine
 from utils.load_parquet_data import load_parquet_data
 from models import Group, Park
@@ -49,27 +49,28 @@ def api_queue_times_dag():
     bronze_folder_path = create_bronze_folder_path(now, BRONZE_BASE_DIR)
     timestamp = get_timestamp(now)
 
-    @task()
-    def extract_data():   
-        engine = get_engine("silver")
+    bronze_folder_path = Path("/opt/airflow/data/bronze/parks_queue_times/2026/08/08/20-34")
+    silver_folder_path = Path("/opt/airflow/data/silver/parks_queue_times/2026/08/08/20-34")
 
-        run_bronze_extraction(
-            engine, 
-            output_base_dir=bronze_folder_path, 
-            timestamp=timestamp
-        )
+    # @task()
+    # def extract_data():   
+    #     engine = get_engine("silver")
+
+    #     run_bronze_extraction(
+    #         engine, 
+    #         output_base_dir=bronze_folder_path, 
+    #         timestamp=timestamp
+    #     )
 
     @task()
     def transform_data():
-        engine = get_engine("silver")
-
-        transform_parks_queue_time(
-            engine, 
-            bronze_dir=bronze_folder_path
+        transform_parks_queue_times( 
+            bronze_path=bronze_folder_path,
+            silver_path=silver_folder_path
         )
 
-
-    extract_data()
+    # extract_data()
+    transform_data()
 
 dag_object = api_queue_times_dag()
 
