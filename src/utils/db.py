@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, text
+from sqlalchemy.dialects.postgresql import insert
 from urllib.parse import quote_plus
 import os
 from pathlib import Path
@@ -74,3 +75,27 @@ def load_db_data(parquet_path, model):
 def get_db_data(query: str, engine) -> pd.DataFrame:
     df = pd.read_sql_query(text(query), engine)
     return df
+
+def upsert_db_data(df: pd.DataFrame, model, unique_columns: list):
+    if df.empty:
+        return
+
+    engine = get_engine(model.db_name)
+    table = model.__table__
+
+    table.create(bind=engine, checkfirst=True)
+
+    records = (
+        df
+        .where(pd.notnull(df), None)
+        .to_dict(orient="records")
+    )
+
+    stmt = insert(table).values(records)
+
+    stmt = stmt.on_conflict_do_nothing(
+        index_elements=unique_columns
+    )
+
+    with engine.begin() as connection:
+        connection.execute(stmt)

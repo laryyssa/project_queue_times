@@ -2,14 +2,16 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task
 from pathlib import Path
 import sys, os
+import pandas as pd
 
 sys.path.insert(0, '/opt/airflow/src')
 
 from bronze.data_from_api import extract_and_load_data
 from silver.transform_parks import transform_groups_and_parks
-from utils.db import load_db_data
+from utils.db import upsert_db_data, load_db_data
 from utils.load_parquet_data import load_parquet_data
-from models import Group, Park
+from models.Group import Group
+from models.Park import Park
 
 BRONZE_PARKS_FILE_PATH = Path("/opt/airflow/data/bronze") / "parks.json"
 SILVER_PARKS_FILE_PATH = Path("/opt/airflow/data/silver") / "parks.parquet"
@@ -54,11 +56,17 @@ def api_parks_dag():
         
     @task
     def load_groups_table():
-        load_db_data(SILVER_GROUPS_FILE_PATH, Group)
+        df_groups = pd.read_parquet(SILVER_GROUPS_FILE_PATH)
+
+        upsert_db_data(
+            df=df_groups,
+            model=Group,
+            unique_columns=["id"]
+        )
 
     @task
     def load_parks_table():
-        load_db_data(SILVER_PARKS_FILE_PATH, Park)
+        df_parks = pd.read_parquet(SILVER_PARKS_FILE_PATH)
 
 
     extract_data() >> transform_data() >> [
