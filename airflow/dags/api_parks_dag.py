@@ -13,7 +13,7 @@ from utils.load_parquet_data import load_parquet_data
 from models.Group import Group
 from models.Park import Park
 
-BRONZE_PARKS_FILE_PATH = Path("/opt/airflow/data/bronze") / "parks.json"
+BRONZE_API_PARKS_FILE_PATH = Path("/opt/airflow/data/bronze") / "api_parks_data.json"
 SILVER_PARKS_FILE_PATH = Path("/opt/airflow/data/silver") / "parks.parquet"
 SILVER_GROUPS_FILE_PATH = Path("/opt/airflow/data/silver") / "groups.parquet"
 
@@ -41,14 +41,14 @@ def api_parks_dag():
             raise ValueError("API_URL não está definida no ambiente.") 
         
         extract_and_load_data(
-            output_path=BRONZE_PARKS_FILE_PATH, 
+            output_path=BRONZE_API_PARKS_FILE_PATH, 
             url=api_url
         )
 
     @task()
     def transform_data():
         df_groups, df_parks = transform_groups_and_parks(
-            input_path=BRONZE_PARKS_FILE_PATH,
+            input_path=BRONZE_API_PARKS_FILE_PATH,
         )
 
         load_parquet_data(df_groups, SILVER_GROUPS_FILE_PATH)
