@@ -68,11 +68,19 @@ def api_parks_dag():
     def load_parks_table():
         df_parks = pd.read_parquet(SILVER_PARKS_FILE_PATH)
 
+        upsert_db_data(
+            df=df_parks,
+            model=Park,
+            unique_columns=["id"]
+        )
 
-    extract_data() >> transform_data() >> [
-        load_groups_table(), 
+
+    (
+        extract_data() >> 
+        transform_data() >> 
+        load_groups_table() >>
         load_parks_table()
-    ]
+    )
 
 dag_object = api_parks_dag()
 

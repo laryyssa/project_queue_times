@@ -83,7 +83,10 @@ def upsert_db_data(df: pd.DataFrame, model, unique_columns: list):
     engine = get_engine(model.db_name)
     table = model.__table__
 
-    table.create(bind=engine, checkfirst=True)
+    model.metadata.create_all(
+        bind=engine,
+        checkfirst=True
+    )
 
     records = (
         df

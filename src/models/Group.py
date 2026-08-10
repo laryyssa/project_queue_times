@@ -6,4 +6,4 @@ class Group(Base):
     db_name = "silver"
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True)
+    name = Column(String(50))
