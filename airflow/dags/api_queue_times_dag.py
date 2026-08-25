@@ -8,12 +8,12 @@ sys.path.insert(0, '/opt/airflow/src')
 
 from bronze.api_queue_times import run_bronze_extraction
 from silver.transform_parks_queue_time import transform_parks_queue_times
-from utils.db import upsert_db_data
+from utils.db import insert_db_data_append_only, upsert_db_data
 from utils.load_parquet_data import load_parquet_data
 
 from models.Lands import Land
 from models.Rides import Ride
-# from models.RidesWaitTimes import RidesWaitTime
+from models.RidesWaitTime import RideWaitTimes
 
 BRONZE_BASE_DIR = "/opt/airflow/data/bronze/parks_queue_times"
 
@@ -68,12 +68,12 @@ def api_queue_times_dag():
     #         timestamp=timestamp
     #     )
 
-    # @task()
-    # def transform_data():
-    #     transform_parks_queue_times( 
-    #         bronze_path=bronze_folder_path,
-    #         silver_path=silver_folder_path
-    #     )
+    @task()
+    def transform_data():
+        transform_parks_queue_times( 
+            bronze_path=bronze_folder_path,
+            silver_path=silver_folder_path
+        )
 
     @task()
     def load_lands_table():
@@ -87,17 +87,20 @@ def api_queue_times_dag():
 
         upsert_db_data(df_rides, Ride, ["id"])
 
-    # @task()
-    # def load_rides_wait_times():
-    #     df_rides_wait_times = pd.read_parquet(silver_folder_path / "rides_wait_times.parquet")
+    @task()
+    def load_rides_wait_time():
+        df_rides_wait_times = pd.read_parquet(silver_folder_path / "rides_wait_time.parquet")
+        df_rides_wait_times.rename(columns={"id": "ride_id"}, inplace=True)
+        df_rides_wait_times = df_rides_wait_times.drop(columns=["id"], errors="ignore") # ---- remover dps
 
-    #     upsert_db_data(df_rides_wait_times, RidesWaitTime, ["id"])
+        insert_db_data_append_only(df_rides_wait_times, RideWaitTimes)
 
     (
         # extract_data() >>
         # transform_data() >>
-        load_lands_table() >>
-        load_rides_table()
+        # load_lands_table() >>
+        # load_rides_table() >>
+        load_rides_wait_time()
     )
 
 dag_object = api_queue_times_dag()

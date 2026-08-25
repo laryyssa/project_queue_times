@@ -9,6 +9,8 @@ import pandas as pd
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+from models.base import Base
+
 load_dotenv(dotenv_path="/opt/airflow/.env")
 
 user = os.getenv("DB_USER")
@@ -125,3 +127,15 @@ def insert_db_data(df: pd.DataFrame, model):
 
     with engine.begin() as connection:
         connection.execute(stmt)
+
+def insert_db_data_append_only(df: pd.DataFrame, model) -> None:
+    if df.empty:
+        return
+
+    engine = get_engine("silver")
+    Base.metadata.create_all(bind=engine, tables=[model.__table__], checkfirst=True)
+
+    records = df.to_dict(orient="records")
+
+    with engine.begin() as connection:
+        connection.execute(insert(model.__table__), records)
