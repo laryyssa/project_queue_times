@@ -85,6 +85,14 @@ pip install -r requirements.txt
 
 ### Executando testes
 
+DAG Inteira
+
+```bash
+sudo docker exec -it project_queue_times-airflow-scheduler-1 python /opt/airflow/dags/api_parks_dag.py
+```
+
+Task Específica
+
 ```bash
 sudo docker exec -it project_queue_times-airflow-scheduler-1  airflow tasks test api_queue_times_dag extract_data 2026-08-06
 ```
