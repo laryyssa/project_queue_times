@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import pandas as pd
 from airflow.decorators import dag, task
 from pathlib import Path
 import sys
@@ -7,13 +8,18 @@ sys.path.insert(0, '/opt/airflow/src')
 
 from bronze.api_queue_times import run_bronze_extraction
 from silver.transform_parks_queue_time import transform_parks_queue_times
-from utils.db import load_db_data, get_engine
+from utils.db import upsert_db_data
 from utils.load_parquet_data import load_parquet_data
-from models import Group, Park
 
+from models.Lands import Land
+from models.Rides import Ride
+# from models.RidesWaitTimes import RidesWaitTime
+
+BRONZE_BASE_DIR = "/opt/airflow/data/bronze/parks_queue_times"
+
+BRONZE_API_PARKS_FILE_PATH = Path("/opt/airflow/data/bronze") / "api_parks_data.json"
 SILVER_PARKS_FILE_PATH = Path("/opt/airflow/data/silver") / "parks.parquet"
 SILVER_GROUPS_FILE_PATH = Path("/opt/airflow/data/silver") / "groups.parquet"
-BRONZE_BASE_DIR = "/opt/airflow/data/bronze/parks_queue_times"
 
 
 def create_bronze_folder_path(now: datetime, base_dir: str) -> Path:
@@ -62,15 +68,37 @@ def api_queue_times_dag():
     #         timestamp=timestamp
     #     )
 
-    @task()
-    def transform_data():
-        transform_parks_queue_times( 
-            bronze_path=bronze_folder_path,
-            silver_path=silver_folder_path
-        )
+    # @task()
+    # def transform_data():
+    #     transform_parks_queue_times( 
+    #         bronze_path=bronze_folder_path,
+    #         silver_path=silver_folder_path
+    #     )
 
-    # extract_data()
-    transform_data()
+    @task()
+    def load_lands_table():
+        df_lands = pd.read_parquet(silver_folder_path / "lands.parquet")
+
+        upsert_db_data(df_lands, Land, ["id"])
+
+    @task()
+    def load_rides_table():
+        df_rides = pd.read_parquet(silver_folder_path / "rides.parquet")
+
+        upsert_db_data(df_rides, Ride, ["id"])
+
+    # @task()
+    # def load_rides_wait_times():
+    #     df_rides_wait_times = pd.read_parquet(silver_folder_path / "rides_wait_times.parquet")
+
+    #     upsert_db_data(df_rides_wait_times, RidesWaitTime, ["id"])
+
+    (
+        # extract_data() >>
+        # transform_data() >>
+        load_lands_table() >>
+        load_rides_table()
+    )
 
 dag_object = api_queue_times_dag()
 

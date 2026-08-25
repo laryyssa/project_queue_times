@@ -52,7 +52,14 @@ def rename_columns(df: pd.DataFrame, rename_dict: dict) -> pd.DataFrame:
     return df_renamed
 
 def get_groups_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    df_groups = df[["group_id", "group_name"]].drop_duplicates().reset_index(drop=True)
+    df_groups = (
+        df[["group_id", "group_name"]]
+        .drop_duplicates()
+        .rename(columns={
+            "group_id": "id",
+            "group_name": "name"
+        })
+    )
 
     df_groups = df_groups.rename(columns={
         "group_id": "id",

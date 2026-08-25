@@ -102,3 +102,26 @@ def upsert_db_data(df: pd.DataFrame, model, unique_columns: list):
 
     with engine.begin() as connection:
         connection.execute(stmt)
+
+def insert_db_data(df: pd.DataFrame, model):
+    if df.empty:
+        return
+
+    engine = get_engine(model.db_name)
+    table = model.__table__
+
+    model.metadata.create_all(
+        bind=engine,
+        checkfirst=True
+    )
+
+    records = (
+        df
+        .where(pd.notnull(df), None)
+        .to_dict(orient="records")
+    )
+
+    stmt = insert(table).values(records)
+
+    with engine.begin() as connection:
+        connection.execute(stmt)
