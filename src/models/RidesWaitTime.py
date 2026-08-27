@@ -7,9 +7,9 @@ class RideWaitTimes(Base):
     db_name = "silver"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    wait_time = Column(Integer, nullable=False)
+    wait_time = Column(Integer, nullable=True)
     last_updated = Column(String(50), nullable=False)
-    is_open = Column(Boolean, nullable=False)
+    is_open = Column(Boolean, nullable=True)
 
     ride_id = Column(
         Integer, 
